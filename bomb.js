@@ -1,10 +1,10 @@
+let tbody = document.querySelector("#table tbody");
+let dataSet = [];
+
 document.querySelector("#exec").addEventListener("click", () => {
   let hor = parseInt(document.querySelector("#hor").value);
   let ver = parseInt(document.querySelector("#ver").value);
   let mine = parseInt(document.querySelector("#mine").value);
-
-  let dataSet = [];
-  let tbody = document.querySelector("#table tbody");
 
   // Picking bombs location
 
@@ -31,6 +31,23 @@ document.querySelector("#exec").addEventListener("click", () => {
     dataSet.push(arr);
     for (let j = 0; j < hor; j++) {
       let td = document.createElement("td");
+
+      td.addEventListener("contextmenu", e => {
+        e.preventDefault();
+        let parentTr = e.currentTarget.parentNode;
+        let parentTbody = e.currentTarget.parentNode.parentNode;
+
+        let kan = Array.prototype.indexOf.call(
+          parentTr.children,
+          e.currentTarget
+        );
+        let jul = Array.prototype.indexOf.call(parentTbody.children, parentTr);
+
+        e.currentTarget.textContent = "!";
+        dataSet[jul][kan] = "!";
+        console.log(dataSet);
+      });
+
       arr.push(1);
       tr.appendChild(td);
     }
