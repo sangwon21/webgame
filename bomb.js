@@ -2,6 +2,7 @@ let tbody = document.querySelector("#table tbody");
 let dataSet = [];
 
 document.querySelector("#exec").addEventListener("click", () => {
+  tbody.innerHTML = "";
   let hor = parseInt(document.querySelector("#hor").value);
   let ver = parseInt(document.querySelector("#ver").value);
   let mine = parseInt(document.querySelector("#mine").value);
@@ -10,7 +11,7 @@ document.querySelector("#exec").addEventListener("click", () => {
 
   let candidate = Array(hor * ver)
     .fill()
-    .map((_, idx) => idx + 1);
+    .map((_, idx) => idx);
 
   let shuffle = [];
 
@@ -22,8 +23,8 @@ document.querySelector("#exec").addEventListener("click", () => {
     shuffle.push(pickedNum);
   }
 
-  console.log("shuffle:");
-  console.log(shuffle);
+  //console.log("shuffle:");
+  //console.log(shuffle);
 
   for (let i = 0; i < ver; i++) {
     let arr = [];
@@ -43,9 +44,20 @@ document.querySelector("#exec").addEventListener("click", () => {
         );
         let jul = Array.prototype.indexOf.call(parentTbody.children, parentTr);
 
-        e.currentTarget.textContent = "!";
-        dataSet[jul][kan] = "!";
-        console.log(dataSet);
+        if (
+          e.currentTarget.textContent === "" ||
+          e.currentTarget.textContent === "X"
+        ) {
+          e.currentTarget.textContent = "!";
+        } else if (e.currentTarget.textContent === "!") {
+          e.currentTarget.textContent = "?";
+        } else if (e.currentTarget.textContent === "?") {
+          if (dataSet[jul][kan] === 1) {
+            e.currentTarget.textContent = "";
+          } else if (dataSet[jul][kan] === "X") {
+            e.currentTarget.textContent = "X";
+          }
+        }
       });
 
       arr.push(1);
@@ -57,10 +69,10 @@ document.querySelector("#exec").addEventListener("click", () => {
   for (let i = 0; i < shuffle.length; i++) {
     let vertical = Math.floor(shuffle[i] / 10);
     let horizon = shuffle[i] % 10;
-    console.log(vertical, horizon);
+    //console.log(vertical, horizon);
     tbody.children[vertical].children[horizon].textContent = "X";
     dataSet[vertical][horizon] = "X";
   }
 
-  console.log(dataSet);
+  //console.log(dataSet);
 });
