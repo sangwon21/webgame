@@ -1,20 +1,47 @@
-let rivalHero = document.getElementById("rival-hero");
-let myHero = document.getElementById("my-hero");
-let rivalDeck = document.getElementById("rival-deck");
-let myDeck = document.getElementById("my-deck");
-let rivalField = document.getElementById("rival-cards");
-let myField = document.getElementById("my-cards");
-let rivalCost = document.getElementById("rival-cost");
-let myCost = document.getElementById("my-cost");
+let rival = {
+  Hero: document.getElementById("rival-hero"),
+  Deck: document.getElementById("rival-deck"),
+  Field: document.getElementById("rival-cards"),
+  Cost: document.getElementById("rival-cost"),
+  DeckData: [],
+  HeroData: [],
+  FieldData: []
+};
 
-let rivalDeckData = [];
-let myDeckData = [];
-let myHeroData;
-let rivalHeroData;
-
-let rivalFieldData = [];
-let myFieldData = [];
+let my = {
+  Hero: document.getElementById("my-hero"),
+  Deck: document.getElementById("my-deck"),
+  Field: document.getElementById("my-cards"),
+  Cost: document.getElementById("my-cost"),
+  DeckData: [],
+  HeroData: [],
+  FieldData: []
+};
 let turn = true;
+let turnBtn = document.getElementById("turn-btn");
+
+const deckToField = (data, myTurn) => {
+  let obj = myTurn ? my : rival;
+  let currentCost = Number(obj.Cost.textContent);
+  if (data.cost > currentCost) {
+    return true;
+  }
+  //console.log(currentCost);
+
+  let idx = obj.DeckData.indexOf(data);
+  obj.DeckData.splice(idx, 1);
+  obj.FieldData.push(data);
+  obj.Deck.innerHTML = "";
+  obj.Field.innerHTML = "";
+  obj.FieldData.forEach(data => {
+    connectCardToDom(data, obj.Field);
+  });
+  obj.DeckData.forEach(data => {
+    connectCardToDom(data, obj.Deck);
+  });
+  obj.Cost.textContent = currentCost - data.cost;
+  data.field = true;
+};
 
 const connectCardToDom = (data, dom, hero) => {
   let card = document.querySelector(".card-hidden .card").cloneNode(true);
@@ -29,47 +56,21 @@ const connectCardToDom = (data, dom, hero) => {
   }
   card.addEventListener("click", () => {
     if (turn) {
-      let currentCost = Number(myCost);
-      if (data.cost > currentCost) {
-        return;
-      }
       if (!data.mine) {
         return;
       }
-
-      let idx = myDeckData.indexOf(data);
-      myDeckData.splice(idx, 1);
-      myFieldData.push(data);
-      myDeck.innerHTML = "";
-      myField.innerHTML = "";
-      myFieldData.forEach(data => {
-        connectCardToDom(data, myField);
-      });
-      myDeckData.forEach(data => {
-        connectCardToDom(data, myDeck);
-      });
-      myCost.textContent = currentCost - data.cost;
+      if (data.field) {
+        card.classList.toggle("card-selected");
+      } else if (!deckToField(data, true)) {
+        createMyDeck(1);
+      }
     } else {
-      let currentCost = Number(rivalCost);
-      if (data.cost > currentCost) {
+      if (data.mine || data.field) {
         return;
       }
-      if (!data.mine) {
-        return;
+      if (!deckToField(data, false)) {
+        createRivalDeck(1);
       }
-      if (data.mine) return;
-      let idx = rivalDeckData.indexOf(data);
-      rivalDeckData.splice(idx, 1);
-      rivalFieldData.push(data);
-      rivalDeck.innerHTML = "";
-      rivalField.innerHTML = "";
-      rivalFieldData.forEach(data => {
-        connectCardToDom(data, rivalField);
-      });
-      rivalDeckData.forEach(data => {
-        connectCardToDom(data, rivalDeck);
-      });
-      rivalCost.textContent = currentCost - data.cost;
     }
   });
   dom.appendChild(card);
@@ -77,30 +78,32 @@ const connectCardToDom = (data, dom, hero) => {
 
 const createRivalDeck = num => {
   for (let i = 0; i < num; i++) {
-    rivalDeckData.push(createCard());
+    rival.DeckData.push(createCard());
   }
-  rivalDeckData.forEach(data => {
-    connectCardToDom(data, rivalDeck);
+  rival.Deck.innerHTML = "";
+  rival.DeckData.forEach(data => {
+    connectCardToDom(data, rival.Deck);
   });
 };
 
 const createMyDeck = num => {
   for (let i = 0; i < num; i++) {
-    myDeckData.push(createCard(false, true));
+    my.DeckData.push(createCard(false, true));
   }
-  myDeckData.forEach(data => {
-    connectCardToDom(data, myDeck);
+  my.Deck.innerHTML = "";
+  my.DeckData.forEach(data => {
+    connectCardToDom(data, my.Deck);
   });
 };
 
 const createRivalHero = () => {
-  rivalHeroData = createCard(true, true);
-  connectCardToDom(rivalHeroData, rivalHero, true);
+  rival.HeroData = createCard(true, true);
+  connectCardToDom(rival.HeroData, rival.Hero, true);
 };
 
 const createMyHero = () => {
-  myHeroData = createCard(true);
-  connectCardToDom(myHeroData, myHero, true);
+  my.HeroData = createCard(true);
+  connectCardToDom(my.HeroData, my.Hero, true);
 };
 
 const initialize = () => {
@@ -128,5 +131,16 @@ function Card(hero, mycard) {
 const createCard = (hero, mycard) => {
   return new Card(hero, mycard);
 };
+
+turnBtn.addEventListener("click", () => {
+  turn = !turn;
+  if (turn) {
+    my.Cost.textContent = 10;
+  } else {
+    rival.Cost.textContent = 10;
+  }
+  document.getElementById("rival").classList.toggle("turn");
+  document.getElementById("my").classList.toggle("turn");
+});
 
 initialize();
